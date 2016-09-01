@@ -2,14 +2,14 @@
 #include <AFMotor.h>
 #include <SoftwareSerial.h>
 
-#define TRIGGER_PIN  12
-#define ECHO_PIN     13
+#define TRIGGER_PIN  A0
+#define ECHO_PIN     A1
 #define MAX_DISTANCE 100
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 AF_DCMotor motor1(1);
 AF_DCMotor motor2(2);
-SoftwareSerial BtSerial(10, 11);
+SoftwareSerial BtSerial(A5, A4);
 
 bool inManagedMode = true;
 char command = 'u';
