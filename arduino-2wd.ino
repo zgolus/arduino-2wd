@@ -2,26 +2,29 @@
 #include <AFMotor.h>
 #include <SoftwareSerial.h>
 
-#define TRIGGER_PIN  A0
+#define TRIGGER_PIN  A2
 #define ECHO_PIN     A1
-#define MAX_DISTANCE 100
+#define MAX_DISTANCE 20
 
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 AF_DCMotor motor1(1);
 AF_DCMotor motor2(2);
 SoftwareSerial BtSerial(A5, A4);
-
-bool inManagedMode = true;
+unsigned long time;
+unsigned long execution = 30000;
+bool maneuver = false;
+bool inManagedMode = false;
 char command = 'u';
 
 void setup() {
   Serial.begin(9600);
   BtSerial.begin(9600);
-  fullSpeed();
+  slowDown();
   halt();
 }
 
 void loop() {
+  time = millis();
   // Serial.println(inManagedMode);
   if (BtSerial.available()) {
     command = BtSerial.read();
@@ -57,13 +60,25 @@ void loop() {
   } else if (!inManagedMode) {
     delay(50);
     unsigned int distance = sonar.ping_cm();
-    if (distance > 0 && distance < 30) {
-      Serial.println("obstacle!");
-      Serial.print(distance);
+
+    if (maneuver) {
+      backward();
+      delay(500);
       turnRight();
+      delay(100);
+      maneuver = false;
     } else {
-      forward();
+      if (distance > 0 && distance < 50) {
+        Serial.println("obstacle!");
+        Serial.print(distance);
+        maneuver = true;
+      } else {
+        forward();
+      } 
     }
+  }
+  if (time >= execution) {
+    halt();
   }
 }
 
